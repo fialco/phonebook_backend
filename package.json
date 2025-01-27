@@ -1,0 +1,28 @@
+{
+  "name": "phonebook_backend",
+  "version": "0.0.1",
+  "description": "Part 3 exercises of full stack open course",
+  "homepage": "https://github.com/fialco/phonebook_backend#readme",
+  "bugs": {
+    "url": "https://github.com/fialco/phonebook_backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fialco/phonebook_backend.git"
+  },
+  "license": "MIT",
+  "author": "fialco",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
