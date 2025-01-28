@@ -1,7 +1,18 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+
+//Depending on if the method is POST or not, different type of log is printed
+app.use(morgan('tiny', {
+  skip: function (req, res) { return req.method === 'POST' }
+}))
+
+morgan.token('json', function (req, res) { return JSON.stringify(req.body) })
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :json', {
+  skip: function (req, res) { return req.method !== 'POST' }
+}))
 
 let persons = [
   {
