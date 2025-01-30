@@ -5,3 +5,12 @@ Content-Type: application/json
     "name": "Kyösti Pöysti",
     "number": "123-456789"
 }
+
+###
+POST https://phonebook-backend-h9a7.onrender.com/api/persons
+Content-Type: application/json
+
+{
+    "name": "Kyösti Pöysti",
+    "number": "123-456789"
+}

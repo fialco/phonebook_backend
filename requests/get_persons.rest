@@ -2,3 +2,6 @@ GET http://localhost:3001/api/persons
 
 ###
 GET http://localhost:3001/api/persons/3
+
+###
+GET https://phonebook-backend-h9a7.onrender.com/api/persons/1
