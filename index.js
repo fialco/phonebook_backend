@@ -11,7 +11,6 @@ app.use(cors())
 
 app.use(express.static('dist'))
 
-
 //Depending on if the method is POST or not, different type of log is printed
 app.use(morgan('tiny', {
   skip: function (req, res) { return req.method === 'POST' }
@@ -56,12 +55,12 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/info', (request, response) => {
-  const personsCount = persons.length
-  const date = new Date()
-  response.send(`<p>Phonebook has info for ${personsCount} people</p><p>${date}</p>`)
+  Person.estimatedDocumentCount().then(count => {
+    response.send(`<p>Phonebook has info for ${count} people</p><p>${Date()}</p>`)
+  })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   /*const id = request.params.id
   const person = persons.find(person => person.id === id)
 
@@ -71,17 +70,15 @@ app.get('/api/persons/:id', (request, response) => {
     response.status(404).end()
   }*/
 
-  Person.findById(request.params.id).then(person => {
-    response.json(person)
-  })
-
-})
-
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  persons = persons.filter(person => person.id !== id)
-
-  response.status(204).end()
+  Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 const generateId = () => {
@@ -89,7 +86,7 @@ const generateId = () => {
   return String(Math.random()).slice(2)
 }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name) {
@@ -118,10 +115,52 @@ app.post('/api/persons', (request, response) => {
 
   //persons = persons.concat(person)
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { number: body.number })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
+app.delete('/api/persons/:id', (request, response, next) => {
+  /*const id = request.params.id
+  persons = persons.filter(person => person.id !== id)
+  response.status(204).end()*/
+  Person.findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+  next(error)
+}
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler)
+
+
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
