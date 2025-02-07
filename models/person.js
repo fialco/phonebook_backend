@@ -27,7 +27,7 @@ const personSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (number) => (
-        /\d{2,3}-\d{6}/.test(number)
+        /^\d{2,3}-\d{6,}$/.test(number)
       ),
       message: () => (
         'Number be formed of two parts that are separated by -, the first part has two or three numbers'
