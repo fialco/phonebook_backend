@@ -1,4 +1,4 @@
-require("dotenv").config()
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const Person = require('./models/person')
@@ -13,36 +13,13 @@ app.use(express.static('dist'))
 
 //Depending on if the method is POST or not, different type of log is printed
 app.use(morgan('tiny', {
-  skip: function (req, res) { return req.method === 'POST' }
+  skip: function (request) { return request.method === 'POST' }
 }))
 
-morgan.token('json', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('json', function (request) { return JSON.stringify(request.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :json', {
-  skip: function (req, res) { return req.method !== 'POST' }
+  skip: function (request) { return request.method !== 'POST' }
 }))
-
-let persons = [
-  {
-    "id": "1",
-    "name": "Arto Hellas",
-    "number": "040-123456"
-  },
-  {
-    "id": "2",
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523"
-  },
-  {
-    "id": "3",
-    "name": "Dan Abramov",
-    "number": "12-43-234345"
-  },
-  {
-    "id": "4",
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122"
-  }
-]
 
 app.get('/', (request, response) => {
   response.send('<h1>Phonebook</h1>')
@@ -61,15 +38,6 @@ app.get('/api/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
-  /*const id = request.params.id
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }*/
-
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -101,19 +69,11 @@ app.post('/api/persons', (request, response, next) => {
     })
   }
 
-  /*if (persons.filter(person => person.name === body.name).length !== 0) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }*/
-
   const person = new Person({
     id: generateId(),
     name: body.name,
     number: body.number
   })
-
-  //persons = persons.concat(person)
 
   person.save()
     .then(savedPerson => {
@@ -126,8 +86,8 @@ app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
 
   Person.findByIdAndUpdate(
-    request.params.id, 
-    { name, number }, 
+    request.params.id,
+    { name, number },
     { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedPerson => {
@@ -137,11 +97,8 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  /*const id = request.params.id
-  persons = persons.filter(person => person.id !== id)
-  response.status(204).end()*/
   Person.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
@@ -152,7 +109,7 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {    
+  } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
   next(error)

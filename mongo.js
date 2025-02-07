@@ -9,7 +9,7 @@ const password = process.argv[2]
 
 const url =
   `mongodb+srv://fialco:${password}@cluster0.k0njs.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`
- 
+
 mongoose.set('strictQuery',false)
 
 mongoose.connect(url)
@@ -39,7 +39,7 @@ if (process.argv.length === 5) {
     number: process.argv[4]
   })
 
-  person.save().then(result => {
+  person.save().then(() => {
     console.log('person saved!')
     mongoose.connection.close()
   })
